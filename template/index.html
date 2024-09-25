@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Themed Stock Prediction</title>
+    <link rel="stylesheet" href="./style.css">
+    <script>
+        async function predictStock(event) {
+            event.preventDefault();
+            const name = document.getElementById("names").value;
+            const modelType = document.getElementById("model").value;
+
+            const stockData = {
+                stock_name: name,
+                model_type: modelType
+            };
+            console.log(stockData);
+            try {
+                const response = await fetch("http://127.0.0.1:8000/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(stockData)
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    displayResult(result);
+                } else {
+                    throw new Error("Dự đoán thất bại. Vui lòng kiểm tra lại thông tin.");
+                }
+            } catch (error) {
+                document.getElementById("result").innerText = error.message;
+            }
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById("result");
+            if (result.error) {
+                resultDiv.innerHTML = `<p style="color: red;">${result.error}</p>`;
+            } else {
+                console.log(result);
+                const predictionText = Array.isArray(result.prediction)
+                    ? result.prediction.join(", ")
+                    : "Dữ liệu dự đoán không hợp lệ";
+
+                resultDiv.innerHTML = `
+                    <h3>Dự đoán cho mã cổ phiếu: ${result.stock_name}</h3>
+                    <p><strong>Dự đoán giá:</strong> ${result.next_day_prediction}</p>
+                    <p><strong>MSE:</strong> ${result.mse}</p>
+                    <p><strong>RMSE:</strong> ${result.rmse}</p>
+                    <p><strong>MAE:</strong> ${result.mae}</p>
+                    <p><strong>R2 Score:</strong> ${result.r2}</p>
+                    <img src="data:image/png;base64,${result.chart}" alt="Plot Image" style="max-width: 100%; height: auto; margin-top: 20px;">
+                `;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Space Themed Stock Prediction</h1>
+        <form onsubmit="predictStock(event)">
+            <div class="input-group">
+                <label for="names">Stock Ticker:</label>
+                <input type="text" id="names" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="model">Model:</label>
+                <select id="model" name="model_type">
+                    <option value="linear">Linear Regression</option>
+                    <option value="ridge">Ridge Regression</option>
+                    <option value="neural">Neural Network</option>
+                    <option value="ensemble">Stacking Model</option>
+                </select>
+            </div>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="result"></div>
+    </div>
+</body>
+
+</html>
