@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 
-from service import get_stock_data, prepare_data, linear_regression, ridge_regression, neural_network, ensemble_model
+from service import get_stock_data, prepare_data, linear_regression, ridge_regression, neural_network
 
 
 templates = Jinja2Templates(directory="templates")
@@ -39,7 +39,7 @@ def read_root(request: Request):
 def predict_stock(data: StockRequest):
     stock_name = data.stock_name
     model_type = data.model_type
-    days = '6mo'
+    days = '1y'
     
     # Lấy dữ liệu cổ phiếu
     stock_data = get_stock_data(stock_name, days)
@@ -59,8 +59,6 @@ def predict_stock(data: StockRequest):
         mse, r2, next_day_prediction, img_base64, rmse, mae = ridge_regression(X_train, X_test, y_train, y_test, X_last_day)
     elif model_type == "neural":
         mse, r2, next_day_prediction, img_base64, rmse, mae = neural_network(X_train, X_test, y_train, y_test, X_last_day)
-    elif model_type == "ensemble":
-        mse, r2, next_day_prediction, img_base64, rmse, mae = ensemble_model(X_train, X_test, y_train, y_test, X_last_day)
     else:
         return {"error": "Model not supported"}
 
