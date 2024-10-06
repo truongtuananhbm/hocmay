@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Themed Stock Prediction</title>
+    <title>Dự Đoán Mã Chứng Khoán</title>
     <link rel="stylesheet" href="./style.css">
     <script>
         async function predictStock(event) {
@@ -62,21 +62,22 @@
 
 <body>
     <div class="container">
-        <h1>Space Themed Stock Prediction</h1>
+        <h1>Dự Đoán Mã Chứng Khoán</h1>
         <form onsubmit="predictStock(event)">
             <div class="input-group">
-                <label for="names">Stock Ticker:</label>
+                <label for="names">Mã Chứng Khoán:</label>
                 <input type="text" id="names" name="name" required>
             </div>
             <div class="input-group">
-                <label for="model">Model:</label>
+                <label for="model">Mô Hình:</label>
                 <select id="model" name="model_type">
-                    <option value="linear">Linear Regression</option>
-                    <option value="ridge">Ridge Regression</option>
-                    <option value="neural">Neural Network</option>
+                    <option value="linear" style="color: black;">Linear Regression</option>
+                    <option value="ridge" style="color: black;">Ridge Regression</option>
+                    <option value="neural" style="color: black;">Neural Network</option>
+                    <option value="stacking" style="color: black;">Stacking Model</option>
                 </select>
             </div>
-            <button type="submit">Predict</button>
+            <button type=" submit">Dự Đoán</button>
         </form>
         <div id="result"></div>
     </div>

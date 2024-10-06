@@ -5,15 +5,12 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 
-from service import get_stock_data, prepare_data, linear_regression, ridge_regression, neural_network
+from service import get_stock_data, prepare_data, linear_regression, ridge_regression, neural_network, stacking
 
 
-templates = Jinja2Templates(directory="templates")
-
-
+templates = Jinja2Templates(directory="./")
 app = FastAPI()
 
-# Thêm middleware CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,41 +21,40 @@ app.add_middleware(
     max_age=3600
 )
 
-# Định nghĩa mô hình yêu cầu cho API
 class StockRequest(BaseModel):
     stock_name: str
     model_type: str
 
-# Endpoint cho trang chính
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("/index.html", {"request": request})
 
-# Endpoint để dự đoán giá cổ phiếu
 @app.post("/predict")
 def predict_stock(data: StockRequest):
     stock_name = data.stock_name
     model_type = data.model_type
-    days = '1y'
+    days = '6mo'
     
-    # Lấy dữ liệu cổ phiếu
     stock_data = get_stock_data(stock_name, days)
     if stock_data is None:
         return {"error": "Failed to retrieve stock data"}
     
-    # Chuẩn bị dữ liệu cho mô hình
+
     X_train, X_test, y_train, y_test = prepare_data(stock_data)
     
-    # Lấy dữ liệu ngày cuối cùng
+
     X_last_day = np.array([stock_data[['Open', 'High', 'Low', 'Volume']].iloc[-1]]).reshape(1, -1)
     
-    # Dự đoán dựa trên loại mô hình
+
     if model_type == "linear":
         mse, r2, next_day_prediction, img_base64, rmse, mae = linear_regression(X_train, X_test, y_train, y_test, X_last_day)
     elif model_type == "ridge":
         mse, r2, next_day_prediction, img_base64, rmse, mae = ridge_regression(X_train, X_test, y_train, y_test, X_last_day)
     elif model_type == "neural":
         mse, r2, next_day_prediction, img_base64, rmse, mae = neural_network(X_train, X_test, y_train, y_test, X_last_day)
+    elif model_type == "stacking":
+        mse, r2, next_day_prediction, img_base64, rmse, mae = stacking(X_train, X_test, y_train, y_test, X_last_day)
+        
     else:
         return {"error": "Model not supported"}
 
